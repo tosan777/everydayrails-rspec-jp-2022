@@ -99,16 +99,19 @@ RSpec.describe ProjectsController, type: :controller do
 
   describe "#edit" do
     # 認可されたユーザーとして
-    before do
-      @user = FactoryBot.create(:user)
-      @project = FactoryBot.create(:project, owner: @user)
-    end
+    context "as an unauthorized user" do
+      before do
+        @user = FactoryBot.create(:user)
+        @project = FactoryBot.create(:project, owner: @user)
+      end
 
-    # プロジェクト編集画面に行けること
-    it "edit a project" do
-      sign_in @user
-      get :edit, params: { id: @project.id }
-      expect(response).to be_successful
+      # プロジェクト編集画面に行けること
+      it "edit a project" do
+        sign_in @user
+        get :edit, params: { id: @project.id }
+        expect(response).to be_successful
+      end
+
     end
 
     # 認可されていないユーザーとして
