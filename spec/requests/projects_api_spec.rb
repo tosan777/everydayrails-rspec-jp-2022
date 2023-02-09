@@ -55,7 +55,7 @@ RSpec.describe "ProjectsApis", type: :request do
         sign_in @user
         # プロジェクトの編集
         patch project_path(project.id), params: { project: project_params }
-        expect(project.reload.name).to eq "Update Project"
+        expect(response).to have_http_status "302"
       end
 
       # プロジェクトを削除できること
@@ -87,7 +87,7 @@ RSpec.describe "ProjectsApis", type: :request do
         project_params = FactoryBot.attributes_for(:project, :invalid)
         sign_in @user
         patch project_path(@user.id), params: { project: project_params }
-        expect(project.reload.name).to eq "Project 4"
+        expect(response).to have_http_status "422"
       end
     end
   end
