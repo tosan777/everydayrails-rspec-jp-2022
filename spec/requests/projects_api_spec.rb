@@ -46,6 +46,28 @@ RSpec.describe "ProjectsApis", type: :request do
           post projects_path, params: { project: project_params }
         }.to change(@user.projects, :count).by(1)
       end
+
+      # プロジェクトを更新できること
+      it "update a project" do
+        # プロジェクトの作成
+        project = FactoryBot.create(:project, owner: @user)
+        project_params = FactoryBot.attributes_for(:project, name: "Update Project")
+        sign_in @user
+        # プロジェクトの編集
+        patch project_path(project.id), params: { project: project_params }
+        expect(project.reload.name).to eq "Update Project"
+      end
+
+      # プロジェクトを削除できること
+      it "destroy a project" do
+        # プロジェクトの作成
+        project = FactoryBot.create(:project, owner: @user)
+        sign_in @user
+        # プロジェクトの削除
+        expect {
+          delete project_path(project.id), params: { id: project.id }
+        }.to change(@user.projects, :count).by(-1)
+      end
     end
 
     # 無効な属性値の場合
@@ -58,6 +80,42 @@ RSpec.describe "ProjectsApis", type: :request do
           post projects_path, params: { project: project_params }
         }.to_not change(@user.projects, :count)
       end
+
+      # プロジェクトを更新できないこと
+      it "does not update a project" do
+        project = FactoryBot.create(:project, owner: @user)
+        project_params = FactoryBot.attributes_for(:project, :invalid)
+        sign_in @user
+        patch project_path(@user.id), params: { project: project_params }
+        expect(project.reload.name).to eq "Project 4"
+      end
+    end
+  end
+
+  # 認証済みではないユーザーとして
+  context "unauthenticated user" do
+    before do
+      @user = FactoryBot.create(:user)
+    end
+
+    # プロジェクトを追加できないこと
+    it "does not add a project" do
+      project_params = FactoryBot.attributes_for(:project)
+      post projects_path, params: { project: project_params }
+      expect(response).to have_http_status "302"
+    end
+
+    it "does not update a project" do
+      project = FactoryBot.create(:project, owner: @user)
+      project_params = FactoryBot.attributes_for(:project, name: "Update Project")
+      patch project_path(project.id), params: { project: project_params }
+      expect(response).to have_http_status "302"
+    end
+
+    it "does not destroy a project" do
+      project = FactoryBot.create(:project, owner: @user)
+      delete project_path(project.id)
+      expect(response).to have_http_status "302"
     end
   end
 end
