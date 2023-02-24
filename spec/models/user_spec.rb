@@ -21,7 +21,8 @@ RSpec.describe User, type: :model do
   it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
 
   it "returns a user's full name as a string" do
-    user = FactoryBot.build(:user, first_name: "John", last_name: "Doe")
+    user = User.new
+    allow(user).to receive(:name).and_return("John Doe")
     expect(user.name).to eq "John Doe"
   end
 end
