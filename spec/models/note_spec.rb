@@ -13,11 +13,8 @@ RSpec.describe Note, type: :model do
     expect(note).to be_valid
   end
 
-  it "is invalid without a message" do
-    note = Note.new(message: nil)
-    note.valid?
-    expect(note.errors[:message]).to include("can't be blank")
-  end
+  # messageがなければエラー
+  it { is_expected.to validate_presence_of :message }
 
   describe "search message for a term" do
     let!(:note1) {
@@ -57,5 +54,12 @@ RSpec.describe Note, type: :model do
         expect(Note.count).to eq 3
       end
     end
+  end
+
+  it "delegates name to the user who created it" do
+    user = instance_double("user", name: "Fake User")
+    note = Note.new
+    allow(note).to receive(:user).and_return(user)
+    expect(note.user_name).to eq "Fake User"
   end
 end
